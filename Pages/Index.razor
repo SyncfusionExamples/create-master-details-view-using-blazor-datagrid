@@ -1,0 +1,147 @@
+﻿@page "/"
+@using Master_Detail_Grid.Data
+@inject Microsoft.AspNetCore.Components.NavigationManager UriHelper
+@using Syncfusion.Blazor.Data
+
+<SfGrid Width="1200px" DataSource="@Employees">
+    <GridTemplates>
+        <DetailTemplate>
+            @{
+                Salesperson Employee = context as Salesperson;
+                List<Location> MapDatum = MapPoints.Where(p => p.name == Employee.City).ToList();
+            }
+            <SfTab Height="350" HeaderPlacement="HeaderPosition.Top">
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Personal Info"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div>
+                                <div style="float:left;padding:45px;padding-top:70px"><img class="photo" src="@UriHelper.ToAbsoluteUri($"https://blazor.syncfusion.com/demos/images/Grid/{Employee.EmployeeID}.png")" alt="@Employee.EmployeeID" /></div>
+                                <div style="padding-top:42px">
+                                    <span style="font-size: x-large;font-weight: bold;">@Employee.FirstName @Employee.LastName</span><br />
+                                    <h6 style="font-weight:400 !important;">@Employee.Title</h6><br />
+                                    <span class="title">Country:</span> <span class="content">@Employee.Country</span><br />
+                                    <span class="title">Postal Code:</span> <span class="content">@Employee.Postal</span><br />
+                                    <span class="title">Mail:</span> <span class="content">@Employee.Email</span>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Sales Details"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div style="padding:25px">
+                                <SfGrid Width="740px" TValue="Orders" Query="@(new Query().Where("EmployeeID", "equal", Employee.EmployeeID))" AllowPaging="true">
+                                    <GridPageSettings PageSize="4"></GridPageSettings>
+                                    <SfDataManager Url="https://js.syncfusion.com/demos/ejservices/Wcf/Northwind.svc/Orders" CrossDomain="true"></SfDataManager>
+                                    <GridColumns>
+                                        <GridColumn Field=@nameof(Orders.OrderID) HeaderText="ID" Width="50"> </GridColumn>
+                                        <GridColumn Field=@nameof(Orders.ShipName) HeaderText="Name" Width="110"></GridColumn>
+                                        <GridColumn Field=@nameof(Orders.ShipCity) HeaderText="City" Width="90"></GridColumn>
+                                        <GridColumn Field=@nameof(Orders.OrderDate) HeaderText="Date" Format="d" Type="ColumnType.Date" TextAlign="TextAlign.Right" Width="70"></GridColumn>
+                                        <GridColumn Field=@nameof(Orders.Freight) HeaderText="Order Value" Format="c2" TextAlign="TextAlign.Right" Width="70"></GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Contact Address"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div style="padding:25px">
+                                <div style="height:260px;width:450px;float:left">
+                                    <SfMaps>
+                                        <MapsCenterPosition Latitude="@MapDatum[0].latitude" Longitude="@MapDatum[0].longitude"></MapsCenterPosition>
+                                        <MapsZoomSettings Enable="false" ZoomFactor=10></MapsZoomSettings>
+                                        <MapsLayers>
+                                            <MapsLayer LayerType="ShapeLayerType.OSM" AnimationDuration=0>
+                                                <MapsMarkerSettings>
+                                                    <MapsMarker Visible="true" DataSource="@MapDatum" Height='30' Width='30' Shape='Syncfusion.Blazor.Maps.MarkerType.Image' ImageUrl='https://blazor.syncfusion.com/demos/styles/images/maps/ballon.png'>
+                                                    </MapsMarker>
+                                                </MapsMarkerSettings>
+                                            </MapsLayer>
+                                        </MapsLayers>
+                                    </SfMaps>
+                                </div>
+                                <div style="width:265px;float:left;padding:40px">
+                                    <h4>Contact Address:</h4>
+                                    <span>@Employee.Address</span>,<br />
+                                    <span>@Employee.City</span>,<br />
+                                    <span>@Employee.Country</span><br />
+                                    <span>Phone: </span><span>@Employee.Phone</span>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Meeting Schedules"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div style="width:450px;padding:25px">
+                                <SfSchedule TValue="MeetingSchedule" Height="260px" SelectedDate="new DateTime(2020, 3, 2)" CurrentView="View.Agenda">
+                                    <ScheduleEventSettings DataSource="@ScheduleData" Query="@(new Query().Where("EID", "equal", Employee.EmployeeID))"></ScheduleEventSettings>
+                                </SfSchedule>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </DetailTemplate>
+    </GridTemplates>
+    <GridColumns>
+        <GridColumn Field=@nameof(Salesperson.FirstName) HeaderText="Name" Width="110"></GridColumn>
+        <GridColumn Field=@nameof(Salesperson.Title) HeaderText="Title" Width="110"></GridColumn>
+        <GridColumn Field=@nameof(Salesperson.City) HeaderText="City" Width="110"></GridColumn>
+        <GridColumn Field=@nameof(Salesperson.Phone) HeaderText="Phone" Width="110"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code   {
+    private List<Salesperson> Employees;
+    private List<Location> MapPoints;
+    private List<MeetingSchedule> ScheduleData;
+
+    protected override void OnInitialized()
+    {
+        Employees = Salesperson.GetSalesperson();
+        MapPoints = Location.GetLocation();
+        ScheduleData = MeetingSchedule.GetMeetingData();
+    }
+}
+
+<style type="text/css" class="cssStyles">
+    .photo {
+        width: 100px;
+        height: 100px;
+        border-radius: 50px;
+        box-shadow: inset 0 0 1px #e0e0e0, inset 0 0 14px rgba(0,0,0,0.2);
+    }
+
+    .title {
+        font-size: large;
+        font-weight: 500;
+    }
+
+    .content {
+        font-size: large;
+    }
+
+    .e-tab .e-content {
+        overflow-y: hidden;
+    }
+
+    .e-tab .e-tab-header {
+        border: 0;
+    }
+
+    .e-tab{
+        padding: 10px;
+    }
+</style>
