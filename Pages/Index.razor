@@ -1,7 +1,6 @@
 ﻿@page "/"
 @using Master_Detail_Grid.Data
 @inject Microsoft.AspNetCore.Components.NavigationManager UriHelper
-@using Syncfusion.Blazor.Data
 
 <SfGrid Width="1200px" DataSource="@Employees">
     <GridTemplates>
@@ -18,10 +17,10 @@
                         </ChildContent>
                         <ContentTemplate>
                             <div>
-                                <div style="float:left;padding:45px;padding-top:70px"><img class="photo" src="@UriHelper.ToAbsoluteUri($"https://blazor.syncfusion.com/demos/images/Grid/{Employee.EmployeeID}.png")" alt="@Employee.EmployeeID" /></div>
-                                <div style="padding-top:42px">
-                                    <span style="font-size: x-large;font-weight: bold;">@Employee.FirstName @Employee.LastName</span><br />
-                                    <h6 style="font-weight:400 !important;">@Employee.Title</h6><br />
+                                <div class="personal-wrap"><img class="photo" src="@UriHelper.ToAbsoluteUri($"https://blazor.syncfusion.com/demos/images/Grid/{Employee.EmployeeID}.png")" alt="@Employee.EmployeeID" /></div>
+                                <div class="top-padding">
+                                    <span class="first-name">@Employee.FirstName @Employee.LastName</span><br />
+                                    <h6 class="title-font">@Employee.Title</h6><br />
                                     <span class="title">Country:</span> <span class="content">@Employee.Country</span><br />
                                     <span class="title">Postal Code:</span> <span class="content">@Employee.Postal</span><br />
                                     <span class="title">Mail:</span> <span class="content">@Employee.Email</span>
@@ -34,7 +33,7 @@
                             <TabHeader Text="Sales Details"></TabHeader>
                         </ChildContent>
                         <ContentTemplate>
-                            <div style="padding:25px">
+                            <div class="inner-padding">
                                 <SfGrid Width="740px" TValue="Orders" Query="@(new Query().Where("EmployeeID", "equal", Employee.EmployeeID))" AllowPaging="true">
                                     <GridPageSettings PageSize="4"></GridPageSettings>
                                     <SfDataManager Url="https://js.syncfusion.com/demos/ejservices/Wcf/Northwind.svc/Orders" CrossDomain="true"></SfDataManager>
@@ -54,22 +53,22 @@
                             <TabHeader Text="Contact Address"></TabHeader>
                         </ChildContent>
                         <ContentTemplate>
-                            <div style="padding:25px">
-                                <div style="height:260px;width:450px;float:left">
+                            <div class="inner-padding">
+                                <div class="left-div-wrap">
                                     <SfMaps>
                                         <MapsCenterPosition Latitude="@MapDatum[0].latitude" Longitude="@MapDatum[0].longitude"></MapsCenterPosition>
-                                        <MapsZoomSettings Enable="false" ZoomFactor=10></MapsZoomSettings>
+                                        <MapsZoomSettings Enable="false" ZoomFactor="7"></MapsZoomSettings>
                                         <MapsLayers>
                                             <MapsLayer LayerType="ShapeLayerType.OSM" AnimationDuration=0>
                                                 <MapsMarkerSettings>
-                                                    <MapsMarker Visible="true" DataSource="@MapDatum" Height='30' Width='30' Shape='Syncfusion.Blazor.Maps.MarkerType.Image' ImageUrl='https://blazor.syncfusion.com/demos/styles/images/maps/ballon.png'>
+                                                    <MapsMarker Visible="true" DataSource="@MapDatum" Height='30' Width='30' Shape='MarkerType.Image' ImageUrl='https://blazor.syncfusion.com/demos/styles/images/maps/ballon.png'>
                                                     </MapsMarker>
                                                 </MapsMarkerSettings>
                                             </MapsLayer>
                                         </MapsLayers>
                                     </SfMaps>
                                 </div>
-                                <div style="width:265px;float:left;padding:40px">
+                                <div class="right-div-wrap">
                                     <h4>Contact Address:</h4>
                                     <span>@Employee.Address</span>,<br />
                                     <span>@Employee.City</span>,<br />
@@ -84,7 +83,7 @@
                             <TabHeader Text="Meeting Schedules"></TabHeader>
                         </ChildContent>
                         <ContentTemplate>
-                            <div style="width:450px;padding:25px">
+                            <div class="schedule-div">
                                 <SfSchedule TValue="MeetingSchedule" Height="260px" SelectedDate="new DateTime(2020, 3, 2)" CurrentView="View.Agenda">
                                     <ScheduleEventSettings DataSource="@ScheduleData" Query="@(new Query().Where("EID", "equal", Employee.EmployeeID))"></ScheduleEventSettings>
                                 </SfSchedule>
@@ -116,32 +115,59 @@
     }
 }
 
-<style type="text/css" class="cssStyles">
+<style type="text/css">
+    .personal-wrap {
+        float: left;
+        padding: 45px;
+        padding-top: 70px
+    }
+    .top-padding {
+        padding-top: 42px;
+    }
+    .first-name {
+        font-size: x-large;
+        font-weight: bold;
+    }
     .photo {
         width: 100px;
         height: 100px;
         border-radius: 50px;
         box-shadow: inset 0 0 1px #e0e0e0, inset 0 0 14px rgba(0,0,0,0.2);
     }
-
     .title {
         font-size: large;
         font-weight: 500;
     }
-
+    .title-font {
+        font-weight: 400;
+    }
+    .left-div-wrap {
+        height: 260px;
+        width: 450px;
+        float: left;
+    }
+    .right-div-wrap {
+        width: 265px;
+        float: left;
+        padding: 40px;
+    }
+    .inner-padding {
+        padding: 25px;
+    }
+    .schedule-div {
+        width: 450px;
+        padding: 25px;
+    }
     .content {
         font-size: large;
     }
-
     .e-tab .e-content {
         overflow-y: hidden;
     }
-
     .e-tab .e-tab-header {
         border: 0;
     }
-
-    .e-tab{
+    .e-tab {
         padding: 10px;
     }
 </style>
