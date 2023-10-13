@@ -1,173 +1,93 @@
 ﻿@page "/"
-@using Master_Detail_Grid.Data
-@inject Microsoft.AspNetCore.Components.NavigationManager UriHelper
 
-<SfGrid Width="1200px" DataSource="@Employees">
-    <GridTemplates>
-        <DetailTemplate>
-            @{
-                Salesperson Employee = context as Salesperson;
-                List<Location> MapDatum = MapPoints.Where(p => p.name == Employee.City).ToList();
-            }
-            <SfTab Height="350" HeaderPlacement="HeaderPosition.Top">
-                <TabItems>
-                    <TabItem>
-                        <ChildContent>
-                            <TabHeader Text="Personal Info"></TabHeader>
-                        </ChildContent>
-                        <ContentTemplate>
-                            <div>
-                                <div class="personal-wrap"><img class="photo" src="@UriHelper.ToAbsoluteUri($"https://blazor.syncfusion.com/demos/images/Grid/{Employee.EmployeeID}.png")" alt="@Employee.EmployeeID" /></div>
-                                <div class="top-padding">
-                                    <span class="first-name">@Employee.FirstName @Employee.LastName</span><br />
-                                    <h6 class="title-font">@Employee.Title</h6><br />
-                                    <span class="title">Country:</span> <span class="content">@Employee.Country</span><br />
-                                    <span class="title">Postal Code:</span> <span class="content">@Employee.Postal</span><br />
-                                    <span class="title">Mail:</span> <span class="content">@Employee.Email</span>
-                                </div>
-                            </div>
-                        </ContentTemplate>
-                    </TabItem>
-                    <TabItem>
-                        <ChildContent>
-                            <TabHeader Text="Sales Details"></TabHeader>
-                        </ChildContent>
-                        <ContentTemplate>
-                            <div class="inner-padding">
-                                <SfGrid Width="740px" TValue="Orders" Query="@(new Query().Where("EmployeeID", "equal", Employee.EmployeeID))" AllowPaging="true">
-                                    <GridPageSettings PageSize="4"></GridPageSettings>
-                                    <SfDataManager Url="https://js.syncfusion.com/demos/ejservices/Wcf/Northwind.svc/Orders" CrossDomain="true"></SfDataManager>
-                                    <GridColumns>
-                                        <GridColumn Field=@nameof(Orders.OrderID) HeaderText="ID" Width="50"> </GridColumn>
-                                        <GridColumn Field=@nameof(Orders.ShipName) HeaderText="Name" Width="110"></GridColumn>
-                                        <GridColumn Field=@nameof(Orders.ShipCity) HeaderText="City" Width="90"></GridColumn>
-                                        <GridColumn Field=@nameof(Orders.OrderDate) HeaderText="Date" Format="d" Type="ColumnType.Date" TextAlign="TextAlign.Right" Width="70"></GridColumn>
-                                        <GridColumn Field=@nameof(Orders.Freight) HeaderText="Order Value" Format="c2" TextAlign="TextAlign.Right" Width="70"></GridColumn>
-                                    </GridColumns>
-                                </SfGrid>
-                            </div>
-                        </ContentTemplate>
-                    </TabItem>
-                    <TabItem>
-                        <ChildContent>
-                            <TabHeader Text="Contact Address"></TabHeader>
-                        </ChildContent>
-                        <ContentTemplate>
-                            <div class="inner-padding">
-                                <div class="left-div-wrap">
-                                    <SfMaps>
-                                        <MapsCenterPosition Latitude="@MapDatum[0].latitude" Longitude="@MapDatum[0].longitude"></MapsCenterPosition>
-                                        <MapsZoomSettings Enable="false" ZoomFactor="7"></MapsZoomSettings>
-                                        <MapsLayers>
-                                            <MapsLayer LayerType="ShapeLayerType.OSM" AnimationDuration=0>
-                                                <MapsMarkerSettings>
-                                                    <MapsMarker Visible="true" DataSource="@MapDatum" Height='30' Width='30' Shape='MarkerType.Image' ImageUrl='https://blazor.syncfusion.com/demos/styles/images/maps/ballon.png'>
-                                                    </MapsMarker>
-                                                </MapsMarkerSettings>
-                                            </MapsLayer>
-                                        </MapsLayers>
-                                    </SfMaps>
-                                </div>
-                                <div class="right-div-wrap">
-                                    <h4>Contact Address:</h4>
-                                    <span>@Employee.Address</span>,<br />
-                                    <span>@Employee.City</span>,<br />
-                                    <span>@Employee.Country</span><br />
-                                    <span>Phone: </span><span>@Employee.Phone</span>
-                                </div>
-                            </div>
-                        </ContentTemplate>
-                    </TabItem>
-                    <TabItem>
-                        <ChildContent>
-                            <TabHeader Text="Meeting Schedules"></TabHeader>
-                        </ChildContent>
-                        <ContentTemplate>
-                            <div class="schedule-div">
-                                <SfSchedule TValue="MeetingSchedule" Height="260px" SelectedDate="new DateTime(2020, 3, 2)" CurrentView="View.Agenda">
-                                    <ScheduleEventSettings DataSource="@ScheduleData" Query="@(new Query().Where("EID", "equal", Employee.EmployeeID))"></ScheduleEventSettings>
-                                </SfSchedule>
-                            </div>
-                        </ContentTemplate>
-                    </TabItem>
-                </TabItems>
-            </SfTab>
-        </DetailTemplate>
-    </GridTemplates>
+@using Syncfusion.Blazor.Data
+
+<SfGrid SelectedRowIndex=2 DataSource="@Employees">
+    <GridEvents RowSelected="RowSelecthandler" TValue="EmployeeData"></GridEvents>
     <GridColumns>
-        <GridColumn Field=@nameof(Salesperson.FirstName) HeaderText="Name" Width="110"></GridColumn>
-        <GridColumn Field=@nameof(Salesperson.Title) HeaderText="Title" Width="110"></GridColumn>
-        <GridColumn Field=@nameof(Salesperson.City) HeaderText="City" Width="110"></GridColumn>
-        <GridColumn Field=@nameof(Salesperson.Phone) HeaderText="Phone" Width="110"></GridColumn>
+        <GridColumn Field=@nameof(EmployeeData.CustomerName) HeaderText="Customer Name" Width="110"> </GridColumn>
+        <GridColumn Field=@nameof(EmployeeData.CompanyName) HeaderText="Company Name" Width="110"></GridColumn>
+        <GridColumn Field=@nameof(EmployeeData.Address) Width="110"></GridColumn>
+        <GridColumn Field=@nameof(EmployeeData.Country) Width="110"></GridColumn>
+    </GridColumns>
+</SfGrid>
+<br>
+<div class='e-statustext'>Showing orders of Customer: <b>@SelectedCustomer</b></div>
+
+<SfGrid DataSource="@GridData" Query="@(new Query().Where("EmployeeID", "equal", RowIndex))">
+    <GridColumns>
+        <GridColumn Field=@nameof(Order.OrderID) HeaderText="Order ID" Width="110"> </GridColumn>
+        <GridColumn Field=@nameof(Order.ShipName) HeaderText="Ship Name" Width="110"></GridColumn>
+        <GridColumn Field=@nameof(Order.ShipCountry) HeaderText="Ship Country" Width="110"></GridColumn>
+        <GridColumn Field=@nameof(Order.ShipAddress) HeaderText="Ship Address" Width="110"></GridColumn>
     </GridColumns>
 </SfGrid>
 
-@code   {
-    private List<Salesperson> Employees;
-    private List<Location> MapPoints;
-    private List<MeetingSchedule> ScheduleData;
+@code {
+    public IEnumerable<Order> GridData { get; set; }
+    public string SelectedCustomer { get; set; }
+    public int? RowIndex { get; set; } = 1003;
+
+    public void RowSelecthandler(RowSelectEventArgs<EmployeeData> Args)
+    {
+        SelectedCustomer = Args.Data.CustomerName;
+        RowIndex = Args.Data.EmployeeID;
+    }
+
+    List<EmployeeData> Employees = new List<EmployeeData>
+    {
+        new EmployeeData() {EmployeeID = 1001, CustomerName="Thomas Hardy", CompanyName="Around the Horn", Address="120 Hanover Sq.", Country="UK"},
+        new EmployeeData() {EmployeeID = 1002, CustomerName="Christina Berglund", CompanyName="Berglunds snabbköp", Address="Berguvsvägen 8", Country="Sweden"},
+        new EmployeeData() {EmployeeID = 1003, CustomerName="Frédérique Citeaux", CompanyName="Blondesddsl père et fils", Address="24, place Kléber", Country="France"},
+        new EmployeeData() {EmployeeID = 1004, CustomerName="Yang Wang", CompanyName="Chop-suey Chinese", Address="Hauptstr. 29", Country="Switzerland"},
+        new EmployeeData() {EmployeeID = 1005, CustomerName="Roland Mendel", CompanyName="Ernst Handel", Address="Kirchgasse 6", Country="Austria"},
+    };
+    List<Order> Orders = new List<Order> {
+        new Order() {EmployeeID = 1001, OrderID=001, ShipName="Around the Horn", ShipCountry="UK", ShipAddress="Brook Farm Stratford St. Mary"},
+        new Order() {EmployeeID = 1001, OrderID=002, ShipName="Around the Horn", ShipCountry="UK", ShipAddress="Brook Farm Stratford St. Mary"},
+        new Order() {EmployeeID = 1001, OrderID=003, ShipName="Around the Horn", ShipCountry="UK", ShipAddress="Brook Farm Stratford St. Mary"},
+        new Order() {EmployeeID = 1001, OrderID=004, ShipName="Around the Horn", ShipCountry="UK", ShipAddress="Brook Farm Stratford St. Mary"},
+        new Order() {EmployeeID = 1001, OrderID=005, ShipName="Around the Horn", ShipCountry="UK", ShipAddress="Brook Farm Stratford St. Mary"},
+        new Order() {EmployeeID = 1002, OrderID=006, ShipName="Berglunds snabbköp", ShipCountry="Sweden", ShipAddress="Berguvsvägen 8"},
+        new Order() {EmployeeID = 1002, OrderID=007, ShipName="Berglunds snabbköp", ShipCountry="Sweden", ShipAddress="Berguvsvägen 8"},
+        new Order() {EmployeeID = 1002, OrderID=008, ShipName="Berglunds snabbköp", ShipCountry="Sweden", ShipAddress="Berguvsvägen 8"},
+        new Order() {EmployeeID = 1002, OrderID=009, ShipName="Berglunds snabbköp", ShipCountry="Sweden", ShipAddress="Berguvsvägen 8"},
+        new Order() {EmployeeID = 1002, OrderID=010, ShipName="Berglunds snabbköp", ShipCountry="Sweden", ShipAddress="Berguvsvägen 8"},
+        new Order() {EmployeeID = 1003, OrderID=011, ShipName="Blondel père et fils", ShipCountry="France", ShipAddress="24, place Kléber"},
+        new Order() {EmployeeID = 1003, OrderID=012, ShipName="Blondel père et fils", ShipCountry="France", ShipAddress="24, place Kléber"},
+        new Order() {EmployeeID = 1003, OrderID=013, ShipName="Blondel père et fils", ShipCountry="France", ShipAddress="24, place Kléber"},
+        new Order() {EmployeeID = 1003, OrderID=014, ShipName="Blondel père et fils", ShipCountry="France", ShipAddress="24, place Kléber"},
+        new Order() {EmployeeID = 1003, OrderID=015, ShipName="Blondel père et fils", ShipCountry="France", ShipAddress="24, place Kléber"},
+        new Order() {EmployeeID = 1004, OrderID=016, ShipName="Chop-suey Chinese", ShipCountry="Switzerland", ShipAddress="Hauptstr. 31"},
+        new Order() {EmployeeID = 1004, OrderID=017, ShipName="Chop-suey Chinese", ShipCountry="Switzerland", ShipAddress="Hauptstr. 31"},
+        new Order() {EmployeeID = 1004, OrderID=018, ShipName="Chop-suey Chinese", ShipCountry="Switzerland", ShipAddress="Hauptstr. 31"},
+        new Order() {EmployeeID = 1004, OrderID=019, ShipName="Chop-suey Chinese", ShipCountry="Switzerland", ShipAddress="Hauptstr. 31"},
+        new Order() {EmployeeID = 1004, OrderID=020, ShipName="Chop-suey Chinese", ShipCountry="Switzerland", ShipAddress="Hauptstr. 31"},
+        new Order() {EmployeeID = 1005, OrderID=021, ShipName="Ernst Handel", ShipCountry="Austria", ShipAddress="Kirchgasse 6"},
+        new Order() {EmployeeID = 1005, OrderID=022, ShipName="Ernst Handel", ShipCountry="Austria", ShipAddress="Kirchgasse 6"},
+        new Order() {EmployeeID = 1005, OrderID=023, ShipName="Ernst Handel", ShipCountry="Austria", ShipAddress="Kirchgasse 6"},
+        new Order() {EmployeeID = 1005, OrderID=024, ShipName="Ernst Handel", ShipCountry="Austria", ShipAddress="Kirchgasse 6"},
+        new Order() {EmployeeID = 1005, OrderID=025, ShipName="Ernst Handel", ShipCountry="Austria", ShipAddress="Kirchgasse 6"},
+    };
 
     protected override void OnInitialized()
     {
-        Employees = Salesperson.GetSalesperson();
-        MapPoints = Location.GetLocation();
-        ScheduleData = MeetingSchedule.GetMeetingData();
+        GridData = this.Orders;
+    }
+    public class EmployeeData
+    {
+        public int? EmployeeID { get; set; }
+        public string CustomerName { get; set; }
+        public string CompanyName { get; set; }
+        public string Address { get; set; }
+        public string Country { get; set; }
+    }
+    public class Order
+    {
+        public int? EmployeeID { get; set; }
+        public int? OrderID { get; set; }
+        public string ShipName { get; set; }
+        public string ShipCountry { get; set; }
+        public string ShipAddress { get; set; }
     }
 }
-
-<style type="text/css">
-    .personal-wrap {
-        float: left;
-        padding: 45px;
-        padding-top: 70px
-    }
-    .top-padding {
-        padding-top: 42px;
-    }
-    .first-name {
-        font-size: x-large;
-        font-weight: bold;
-    }
-    .photo {
-        width: 100px;
-        height: 100px;
-        border-radius: 50px;
-        box-shadow: inset 0 0 1px #e0e0e0, inset 0 0 14px rgba(0,0,0,0.2);
-    }
-    .title {
-        font-size: large;
-        font-weight: 500;
-    }
-    .title-font {
-        font-weight: 400;
-    }
-    .left-div-wrap {
-        height: 260px;
-        width: 450px;
-        float: left;
-    }
-    .right-div-wrap {
-        width: 265px;
-        float: left;
-        padding: 40px;
-    }
-    .inner-padding {
-        padding: 25px;
-    }
-    .schedule-div {
-        width: 450px;
-        padding: 25px;
-    }
-    .content {
-        font-size: large;
-    }
-    .e-tab .e-content {
-        overflow-y: hidden;
-    }
-    .e-tab .e-tab-header {
-        border: 0;
-    }
-    .e-tab {
-        padding: 10px;
-    }
-</style>
