@@ -2,7 +2,7 @@
 
 ## Overview
 
-This sample demonstrates how to bind a Syncfusion Blazor DataGrid using a custom adaptor implemented as a Blazor component. The custom adaptor is created by extending `OwningComponentBase` and uses the `DataAdaptor` base class to process DataGrid requests. The sample supports Create, Read, Update, and Delete (CRUD) operations together with sorting and filtering, enabling complete control over how grid data is retrieved, modified, and persisted. This approach is useful when applications require custom business logic, service-based data access, or advanced server-side processing that extends beyond the functionality provided by built-in adaptors.
+This sample demonstrates how to bind a Syncfusion [Blazor DataGrid](https://www.syncfusion.com/blazor-components/blazor-datagrid) using a custom adaptor implemented as a Blazor component. The custom adaptor is created by extending `OwningComponentBase` and uses the `DataAdaptor` base class to process DataGrid requests. The sample supports Create, Read, Update, and Delete (CRUD) operations together with sorting and filtering, enabling complete control over how grid data is retrieved, modified, and persisted. This approach is useful when applications require custom business logic, service-based data access, or advanced server-side processing that extends beyond the functionality provided by built-in adaptors.
 
 ## Key Features
 
